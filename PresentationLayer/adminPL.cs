@@ -146,11 +146,47 @@ namespace PresentationLayer
                             Console.WriteLine("\n------DELETION FAILED!! Second entered account no. does not match with first input-----");
                         break;
                     case 3:
+                        Customer_BO customer = new Customer_BO();
                         Console.WriteLine("\n======== Update Account Information ========\n");
-
-
+                        Console.WriteLine("\nEnter the account number whose info want to update: ");
+                        string accountStr = Console.ReadLine();
+                        int accountNo = 0;
+                        //check if account no entered is numeric? if not then get input again and typecaste to int
+                        bool IsNumericc = int.TryParse(accountStr, out accountNo);
+                        while (!IsNumericc)
+                        {
+                            Console.WriteLine("\nPlease enter valid account number(numbers only): ");
+                            accountStr = Console.ReadLine();
+                            IsNumericc = int.TryParse(accountStr, out accountNo);
+                        }
+                        customer = busLogic.getCustomerDetails(accountNo);
+                        Console.WriteLine("Account # " + customer.accountNo + "Type: " + customer.accountType + "Holder: " + customer.holderName + "Balance: " + customer.balance + "Status: " + customer.status);
+                        Console.WriteLine("\nPlease enter in the fields you wish to update (leave blank otherwise): \nLogin: ");
+                        customer.UserId = Console.ReadLine();
+                        Console.WriteLine("Pin Code: ");
+                        customer.Pin = int.Parse(Console.ReadLine());
+                        Console.WriteLine("Holders Name:: ");
+                        customer.holderName = Console.ReadLine();
+                        Console.WriteLine("Status:: ");
+                        string statuss = Console.ReadLine();
+                        if (statuss=="")
+                            customer.status="";
+                        else
+                        {
+                            statuss= statuss.ToLower();
+                            while ((statuss!="active")&&(statuss!="disabled"))
+                            {
+                                Console.WriteLine("\nPlease Enter status(active/disabled): ");
+                                statuss = Console.ReadLine();
+                                statuss= statuss.ToLower();
+                            }
+                            customer.status = statuss;
+                        }
+                        customer.accountNo=accountNo;
+                        busLogic.updateCustomer(customer);
                         break;
                     case 4:
+                        List<Customer_BO> customerList = new List<Customer_BO>();
                         Customer_BO searchAccount = new Customer_BO();
                         Console.WriteLine("\n======== Search for Account========\n");
                         Console.WriteLine("SEARCH MENU:\n Account ID: ");
@@ -215,7 +251,15 @@ namespace PresentationLayer
                             }
                             searchAccount.status = statuss;
                         }
-                        busLogic.searchAcounts(searchAccount);
+                        customerList = busLogic.searchAccounts(searchAccount);
+                        String s = String.Format("{0,-30} {1,-35} {2,-35} {3,-35} {4,-30} {5,-30}  \n", "Account ID", "| User ID", "| Holders Name", "| Type", "| Balance", "| Status");
+                        Console.WriteLine(s);
+                        int count = customerList.Count;
+                        for(int i =0; i<count; i++)
+                        {
+                        s = String.Format("{ 0,-30} { 1,-35} { 2,-35} { 3,-35} { 4,-30} { 5,-30}  \n", customerList[i].accountNo, customerList[i].UserId, customerList[i].holderName, customerList[i].accountType, customerList[i].balance, customerList[i].status);
+                        Console.WriteLine(s + "\n");
+                        }
 
 
                         break;

@@ -47,14 +47,28 @@ namespace DataAcessLayer
             comand.Parameters.Add(p5);
             comand.Parameters.Add(p6);
             comand.ExecuteNonQuery();
-            SqlParameter p7 = new SqlParameter("i", customerAccDetails.UserId);
-            query = "SELECT accountNo FROM customers WHERE userId=@i";
-            SqlCommand comand2 = new SqlCommand(query, con);
-            comand2.Parameters.Add(p7);
+            con.Close();
+            return getAccountno(customerAccDetails.UserId);
+        }
+
+        public int getAccountno(string id)
+        {
+            string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            SqlConnection con2 = new SqlConnection(conString);
+            con2.Open();
+            SqlParameter p1 = new SqlParameter("i", id);
+            string query2 = "SELECT accountNo FROM customers WHERE userId=@i";
+            SqlCommand comand2 = new SqlCommand(query2, con2);
+            comand2.Parameters.Add(p1);
             SqlDataReader dr = comand2.ExecuteReader();
-            int accountNo = int.Parse(dr["accountNo"].ToString());
+            int accountNo = 0;
+            if (dr.Read())
+                accountNo = int.Parse(dr["accountNo"].ToString());
+            con2.Close();
             return accountNo;
         }
+
+
         public string readAccountHolderName(int accountNum)
         {
             string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
@@ -106,19 +120,133 @@ namespace DataAcessLayer
             }
             return false;
         }
+        
+        public List<Customer_BO> searchAccounts(Customer_BO searchCriteria)
+        {
+            List<Customer_BO> customerList = new List<Customer_BO>();
+            bool[] paramsExist = {false, false, false, false, false, false};
+            string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            SqlConnection con = new SqlConnection(conString);
+            con.Open();
+            SqlParameter p1 = null;
+            SqlParameter p2 = null;
+            SqlParameter p3 = null;
+            SqlParameter p4 = null;
+            SqlParameter p5 = null;
+            SqlParameter p6 = null;
+            //apply conditions for only those fields that are entered by admin
+            string query = "SELECT accountNo, userId, name, accountType,balance,status FROM customers WHERE ";
+            if (searchCriteria.accountNo != -1)
+            {
+                paramsExist[0]=true;
+                p1 = new SqlParameter("a", searchCriteria.accountNo);
+                query += " accountNo = @a";
+            }
+            if (searchCriteria.UserId!="")
+            {
+                paramsExist[1]=true;
+                p2= new SqlParameter("i", searchCriteria.UserId);
+                if (paramsExist[0]==true)
+                    query+=" AND";
+                query+=" userId = @i";
+            }
+            if (searchCriteria.holderName!="")
+            {
+                paramsExist[2]=true;
+                p3= new SqlParameter("n", searchCriteria.holderName);
+                if (paramsExist[1]==true)
+                    query+=" AND";
+                query+=" name= @n";
+            }
+            if (searchCriteria.accountType!="")
+            {
+                paramsExist[3]=true;
+                p4= new SqlParameter("t", searchCriteria.accountType);
+                if (paramsExist[2]==true)
+                    query+=" AND";
+                query+=" accountType = @t";
+            }
+            if (searchCriteria.balance!=-1)
+            {
+                paramsExist[4]=true;
+                p5=new SqlParameter("b", searchCriteria.balance);
+                if (paramsExist[3]==true)
+                    query+=" AND";
+                query+=" balance = @b";
+            }
+            if (searchCriteria.status!="")
+            {
+                paramsExist[5]=true;
+                p6=new SqlParameter("s", searchCriteria.status);
+                if (paramsExist[4]==true)
+                    query+=" AND";
+                query+=" status = @s";
+            }
+            SqlCommand comand = new SqlCommand(query, con);
+            if (paramsExist[0]==true)
+                comand.Parameters.Add(p1);
+            if (paramsExist[1]==true)
+                comand.Parameters.Add(p2);
+            if (paramsExist[2]==true)
+                comand.Parameters.Add(p3);
+            if (paramsExist[3]==true)
+                comand.Parameters.Add(p4);
+            if (paramsExist[4]==true)
+                comand.Parameters.Add(p5);
+             if (paramsExist[5]==true)
+                comand.Parameters.Add(p6);
 
-        public List<Customer_BO> searchAcounts()
+            SqlDataReader dr = comand.ExecuteReader();
+            Customer_BO customer = new Customer_BO();
+            while (dr.Read())
+            {
+                customer.accountNo = int.Parse(dr[0].ToString());
+                customer.UserId=  dr[1].ToString();
+                customer.holderName= dr[2].ToString();
+                customer.accountType=dr[3].ToString();
+                customer.balance=  int.Parse(dr[4].ToString());
+                customer.status=dr[5].ToString();
+                customerList.Add(customer);
+            }
+            con.Close();
+            return customerList;
+        }
+
+        public Customer_BO getCustomerDetails(int accountNo)
+        {
+            Customer_BO customerOld = new Customer_BO();
+            string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            SqlConnection con = new SqlConnection(conString);
+            con.Open();
+            SqlParameter p1 = new SqlParameter("n", accountNo);
+            string query = "SELECT accountNo, accountType, name, balance, status FROM customers WHERE accountNo=@n";
+            SqlCommand comand = new SqlCommand(query, con);
+            comand.Parameters.Add(p1);
+            SqlDataReader dr = comand.ExecuteReader();
+            if (dr.HasRows)
+            {
+                customerOld.accountNo =int.Parse(dr[0].ToString());
+                customerOld.accountType = dr[1].ToString();
+                customerOld.holderName = dr[2].ToString();
+                customerOld.balance = int.Parse(dr[3].ToString());
+                customerOld.status = dr[4].ToString();
+            }
+            con.Close();
+            return customerOld;
+        }
+
+        public void updateCustomer(Customer_BO customer)
         {
             string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
             SqlConnection con = new SqlConnection(conString);
             con.Open();
-            SqlParameter p1 = new SqlParameter("a", accountNum);
-            string query = "SELECT * FROM customers WHERE accountNo=@a";
+            SqlParameter p1 = new SqlParameter("a", customer.accountNo);
+            string query = "UPDATE                               customers WHERE accountNo=@a";
             SqlCommand comand = new SqlCommand(query, con);
             comand.Parameters.Add(p1);
-            SqlDataReader dr = comand.ExecuteReader();
+            comand.ExecuteNonQuery();
+            con.Close();
         }
-
 
     }
 }

@@ -72,19 +72,19 @@ namespace BusinessLogicLayer
         {
             return adminData.DeleteExistingAccount(accountNo);
         }
-
-        public List<Customer_BO> searchAcounts(Customer_BO searchCriteria)
+        
+        public List<Customer_BO> searchAccounts(Customer_BO searchCriteria)
         {
-            string query = "SELECT accountNo, userId, name, accountType,balance,status FROM customers WHERE ";
-            if(searchCriteria.accountNo != -1)
-
-            if(searchCriteria.UserId=="")
-            if(searchCriteria.holderName=="")
-            if(searchCriteria.accountType=="")
-            if(searchCriteria.balance==-1)
-            if(searchCriteria.status=="")
-
+            return adminData.searchAccounts(searchCriteria);
         }
 
+        public Customer_BO getCustomerDetails(int accNo)
+        {
+            return adminData.getCustomerDetails(accNo);
+        }
+        public void updateCustomer(Customer_BO customer)
+        {
+
+        }
     }
 }
