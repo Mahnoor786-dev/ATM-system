@@ -85,6 +85,6 @@ namespace BusinessLogicLayer
         public void updateCustomer(Customer_BO customer)
         {
 
-        }
+        } 
     }
 }
