@@ -82,9 +82,17 @@ namespace BusinessLogicLayer
         {
             return adminData.getCustomerDetails(accNo);
         }
-        public void updateCustomer(Customer_BO customer)
+        public void updateCustomer(Customer_BO customerOld, Customer_BO customerUpdated)
         {
-
-        } 
+            if (customerUpdated.UserId=="")
+                customerUpdated.UserId=customerOld.UserId;
+            if (customerUpdated.Pin==0)
+                customerUpdated.Pin=customerOld.Pin;
+            if (customerUpdated.holderName=="")
+                customerUpdated.holderName=customerOld.holderName;
+            if (customerUpdated.status=="")
+                customerUpdated.status=customerOld.status;
+            adminData.updateCustomer(customerUpdated);
+        }
     }
 }

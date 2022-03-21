@@ -240,10 +240,18 @@ namespace DataAcessLayer
             string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
             SqlConnection con = new SqlConnection(conString);
             con.Open();
-            SqlParameter p1 = new SqlParameter("a", customer.accountNo);
-            string query = "UPDATE                               customers WHERE accountNo=@a";
+            SqlParameter p1 = new SqlParameter("i", customer.UserId);
+            SqlParameter p2 = new SqlParameter("p", customer.Pin);
+            SqlParameter p3 = new SqlParameter("n", customer.holderName);
+            SqlParameter p4 = new SqlParameter("s", customer.status);
+            SqlParameter p5 = new SqlParameter("a", customer.accountNo);
+            string query = "UPDATE customers SET userId=@i, pinCode=@p, name=@n, status=@s WHERE accountNo=@a";
             SqlCommand comand = new SqlCommand(query, con);
             comand.Parameters.Add(p1);
+            comand.Parameters.Add(p2);
+            comand.Parameters.Add(p3);
+            comand.Parameters.Add(p4);
+            comand.Parameters.Add(p5);
             comand.ExecuteNonQuery();
             con.Close();
         }

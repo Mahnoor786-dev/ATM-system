@@ -147,6 +147,7 @@ namespace PresentationLayer
                         break;
                     case 3:
                         Customer_BO customer = new Customer_BO();
+                        Customer_BO customerUpdated = new Customer_BO();
                         Console.WriteLine("\n======== Update Account Information ========\n");
                         Console.WriteLine("\nEnter the account number whose info want to update: ");
                         string accountStr = Console.ReadLine();
@@ -162,28 +163,34 @@ namespace PresentationLayer
                         customer = busLogic.getCustomerDetails(accountNo);
                         Console.WriteLine("Account # " + customer.accountNo + "Type: " + customer.accountType + "Holder: " + customer.holderName + "Balance: " + customer.balance + "Status: " + customer.status);
                         Console.WriteLine("\nPlease enter in the fields you wish to update (leave blank otherwise): \nLogin: ");
-                        customer.UserId = Console.ReadLine();
+                        customerUpdated.UserId = Console.ReadLine();
                         Console.WriteLine("Pin Code: ");
-                        customer.Pin = int.Parse(Console.ReadLine());
+                        string pinn = Console.ReadLine();
+                        if (pinn == "")
+                            customerUpdated.Pin=0;
+                        else
+                            customerUpdated.Pin = int.Parse(pinn);
                         Console.WriteLine("Holders Name:: ");
-                        customer.holderName = Console.ReadLine();
+                        customerUpdated.holderName = Console.ReadLine();
                         Console.WriteLine("Status:: ");
                         string statuss = Console.ReadLine();
+                        if (statuss!="")
+                                statuss= statuss.ToLower();
                         if (statuss=="")
                             customer.status="";
                         else
                         {
-                            statuss= statuss.ToLower();
-                            while ((statuss!="active")&&(statuss!="disabled"))
+                            while ((statuss!="active")&&(statuss!="disabled")&&(statuss!=""))
                             {
                                 Console.WriteLine("\nPlease Enter status(active/disabled): ");
                                 statuss = Console.ReadLine();
-                                statuss= statuss.ToLower();
+                                if (statuss!="")
+                                    statuss= statuss.ToLower();
                             }
-                            customer.status = statuss;
+                            customerUpdated.status = statuss;
                         }
-                        customer.accountNo=accountNo;
-                        busLogic.updateCustomer(customer);
+                        customerUpdated.accountNo=accountNo;
+                        busLogic.updateCustomer(customer, customerUpdated);
                         break;
                     case 4:
                         List<Customer_BO> customerList = new List<Customer_BO>();
