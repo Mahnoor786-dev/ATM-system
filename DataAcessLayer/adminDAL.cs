@@ -24,6 +24,7 @@ namespace DataAcessLayer
                 return true;
             }
             con.Close();
+            dr.Close();
             return false;
         }
         public int CreateNewAccount(Customer_BO customerAccDetails)
@@ -62,12 +63,12 @@ namespace DataAcessLayer
             comand2.Parameters.Add(p1);
             SqlDataReader dr = comand2.ExecuteReader();
             int accountNo = 0;
-            if (dr.Read())
-                accountNo = int.Parse(dr["accountNo"].ToString());
+            if (dr.HasRows)
+                accountNo = int.Parse(dr[0].ToString());
             con2.Close();
+            dr.Close();
             return accountNo;
         }
-
 
         public string readAccountHolderName(int accountNum)
         {
@@ -79,8 +80,11 @@ namespace DataAcessLayer
             SqlCommand comand = new SqlCommand(query, con);
             comand.Parameters.Add(p1);
             SqlDataReader dr = comand.ExecuteReader();
-            string name = dr["name"].ToString();
+            string name = "";
+            if (dr.HasRows)
+                name = dr["name"].ToString();
             con.Close();
+            dr.Close();
             return name;
         }
 
@@ -99,6 +103,8 @@ namespace DataAcessLayer
                 con.Close();
                 return true;
             }
+            con.Close();
+            dr.Close();
             return false;
         }
 
@@ -209,8 +215,10 @@ namespace DataAcessLayer
                 customerList.Add(customer);
             }
             con.Close();
+            dr.Close();
             return customerList;
         }
+
 
         public Customer_BO getCustomerDetails(int accountNo)
         {
@@ -232,6 +240,7 @@ namespace DataAcessLayer
                 customerOld.status = dr[4].ToString();
             }
             con.Close();
+            dr.Close();
             return customerOld;
         }
 
