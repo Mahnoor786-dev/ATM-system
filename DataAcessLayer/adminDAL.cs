@@ -63,6 +63,7 @@ namespace DataAcessLayer
             comand2.Parameters.Add(p1);
             SqlDataReader dr = comand2.ExecuteReader();
             int accountNo = 0;
+           
             if (dr.HasRows)
                 accountNo = int.Parse(dr[0].ToString());
             con2.Close();
@@ -83,6 +84,7 @@ namespace DataAcessLayer
             string name = "";
             if (dr.HasRows)
                 name = dr["name"].ToString();
+            
             con.Close();
             dr.Close();
             return name;
@@ -123,6 +125,7 @@ namespace DataAcessLayer
                 comand.Parameters.Add(p1);
                 comand.ExecuteNonQuery();
                 con.Close();
+                return true;
             }
             return false;
         }
@@ -239,6 +242,7 @@ namespace DataAcessLayer
                 customerOld.balance = int.Parse(dr[3].ToString());
                 customerOld.status = dr[4].ToString();
             }
+          
             con.Close();
             dr.Close();
             return customerOld;

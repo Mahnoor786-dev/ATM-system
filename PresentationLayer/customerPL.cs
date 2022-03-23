@@ -38,7 +38,7 @@ namespace PresentationLayer
                 }
                 else
                 {
-                    Console.WriteLine("\nWRONG PIN.!!");
+                    Console.WriteLine("\nWRONG CREDENTIALS.!!");
                     wrongAttempts++;
                 }
             }

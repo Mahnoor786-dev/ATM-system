@@ -10,7 +10,7 @@ namespace PresentationLayer
     {
         public char mainView()
         {
-            Console.WriteLine("\nYou want to login as: \n1- Admin \n2- Customer Enter 1 or 2? ");
+            Console.WriteLine("\nYou want to login as: \n1- Admin \n2- Customer\n Enter 1 or 2? ");
             string userTypeStr = Console.ReadLine();
             int userType = 0;
             bool isNumeric = int.TryParse(userTypeStr, out userType);

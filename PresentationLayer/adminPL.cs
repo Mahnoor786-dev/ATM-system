@@ -148,7 +148,7 @@ namespace PresentationLayer
                     IsNumeric = int.TryParse(accountNoStr, out accountNum);
                 }
                 string name = adminLogic.getAccountHolderName(accountNum);
-                Console.WriteLine("\nYou wish to delete the account held by "+ accountNum + ". If this information is correct please re-enter the account number: ");
+                Console.WriteLine("\nYou wish to delete the account held by "+ name + ". If this information is correct please re-enter the account number: ");
                 string accountNoStr2 = Console.ReadLine();
                 int accountNum2 = 0;
                 //check if account no entered is numeric? if not then get input again and typecaste to int
@@ -288,12 +288,12 @@ namespace PresentationLayer
                     searchAccount.status = statuss;
                 }
                 customerList = busLogic.searchAccounts(searchAccount);
-                String s = String.Format("{0,-30} {1,-35} {2,-35} {3,-35} {4,-30} {5,-30}  \n", "Account ID", "| User ID", "| Holders Name", "| Type", "| Balance", "| Status");
+                String s = String.Format("{0,-25} {1,-25} {2,-25} {3,-25} {4,-20} {5,-20}  \n", "Account ID", "| User ID", "| Holders Name", "| Type", "| Balance", "| Status");
                 Console.WriteLine(s);
                 int count = customerList.Count;
                 for (int i = 0; i<count; i++)
                 {
-                    s = String.Format("{ 0,-30} { 1,-35} { 2,-35} { 3,-35} { 4,-30} { 5,-30}  \n", customerList[i].accountNo, customerList[i].UserId, customerList[i].holderName, customerList[i].accountType, customerList[i].balance, customerList[i].status);
+                    s = String.Format("{0,-25} {1,-25} {2,-25} {3,-25} {4,-20} {5,-20}  \n", customerList[i].accountNo, customerList[i].UserId, customerList[i].holderName, customerList[i].accountType, customerList[i].balance, customerList[i].status);
                     Console.WriteLine(s + "\n");
                 }
 
