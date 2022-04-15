@@ -37,7 +37,6 @@ namespace DataAcessLayer
             comand.ExecuteNonQuery();
             con.Close();
         }
-
         public Customer_BO checkBalance(Customer_BO obj)
         {
             string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
@@ -50,8 +49,11 @@ namespace DataAcessLayer
             SqlDataReader dr = comand.ExecuteReader();
             if (dr.HasRows)
             {
-                obj.balance = int.Parse(dr["balance"].ToString());
-                obj.accountNo = int.Parse(dr["accountNo"].ToString());
+                while (dr.Read())
+                {
+                    obj.balance = Int32.Parse(dr["balance"].ToString());
+                    obj.accountNo =  Int32.Parse(dr["accountNo"].ToString());
+                }
             }
             con.Close();
             return obj;
@@ -63,19 +65,18 @@ namespace DataAcessLayer
             string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
             SqlConnection con = new SqlConnection(conString);
             con.Open();
-            SqlParameter p1 = new SqlParameter("w", obj.requestedWithdraw);
+            int newBalance = obj.balance - obj.requestedWithdraw;
+            SqlParameter p1 = new SqlParameter("b", newBalance);
             SqlParameter p2 = new SqlParameter("u", obj.UserId);
-            string query = "UPDATE customers SET balance = balance - @w WHERE userId=@u";
+            string query = "UPDATE customers SET balance = @b WHERE userId=@u";
             SqlCommand comand = new SqlCommand(query, con);
             comand.Parameters.Add(p1);
             comand.Parameters.Add(p2);
             comand.ExecuteNonQuery();
-            DateTime cur_date = DateTime.Today;
-            string id = obj.UserId;
             SqlParameter p3 = new SqlParameter("w", obj.requestedWithdraw);
-            SqlParameter p4 = new SqlParameter("d", cur_date);
-            SqlParameter p5 = new SqlParameter("i", id);
-            query="UPDATE cust_Transactions SET withdrawal=@w, date=@d WHERE userId=@i";
+            SqlParameter p4 = new SqlParameter("d", DateTime.Now.Date);
+            SqlParameter p5 = new SqlParameter("i", obj.UserId);
+            query="INSERT INTO cust_Transactions VALUES(@i, @d ,@w)";
             SqlCommand comand2 = new SqlCommand(query, con);
             comand2.Parameters.Add(p3);
             comand2.Parameters.Add(p4);
@@ -97,7 +98,9 @@ namespace DataAcessLayer
             SqlDataReader dr = comand.ExecuteReader();
             int withdrawT = 0;
             while (dr.Read())
-                withdrawT+= int.Parse(dr[2].ToString()); //sum of todays' withdrawals 
+            {
+                withdrawT+= Int32.Parse(dr["withdrawal"].ToString()); //sum of todays' withdrawals 
+            }
             con.Close();
             obj.withdrawalToday=withdrawT;
             return obj;
@@ -115,7 +118,12 @@ namespace DataAcessLayer
             comand.Parameters.Add(p1);
             SqlDataReader dr = comand.ExecuteReader();
             if (dr.HasRows)
-                receiver.name = dr[0].ToString();
+            {
+                while (dr.Read())
+                {
+                    receiver.name = dr["name"].ToString();
+                }
+            }
             con.Close();
             return receiver;
         }
@@ -160,11 +168,11 @@ namespace DataAcessLayer
             transaction = senderObj.requestedTransaction;
             int accountNum = receiver.accountNo;
             SqlParameter p4 = new SqlParameter("n", accountNum);
-            query="UPDATE customers SET balance = balance + @t  WHERE accountNo = @n";
+            SqlParameter p5 = new SqlParameter("tr", transaction);
+            query="UPDATE customers SET balance = balance + @tr  WHERE accountNo = @n";
             SqlCommand comand2 = new SqlCommand(query, con);
             comand2.Parameters.Add(p4);
-            comand2.Parameters.Add(p2);
-
+            comand2.Parameters.Add(p5);
             comand2.ExecuteNonQuery();
             con.Close();
         }
@@ -175,8 +183,8 @@ namespace DataAcessLayer
             SqlConnection con = new SqlConnection(conString);
             con.Open();
             SqlParameter p1 = new SqlParameter("u", b_Obj.UserId);
-            SqlParameter p2 = new SqlParameter("d", b_Obj.requestedDeposit);
-            string query = "UPDATE customers SET balance = balance + @d WHERE userId=@u";
+            SqlParameter p2 = new SqlParameter("b", b_Obj.balance);
+            string query = "UPDATE customers SET balance = @b WHERE userId=@u";
             SqlCommand comand = new SqlCommand(query, con);
             comand.Parameters.Add(p1);
             comand.Parameters.Add(p2);

@@ -20,7 +20,7 @@ namespace PresentationLayer
                 Console.WriteLine("\nPlease enter valid entry(1 or 2 only): ");
                 userTypeStr = Console.ReadLine();
                 isNumeric = int.TryParse(userTypeStr, out userType);
-            }
+            } 
             //return a: for admin , or c: for customer
             if (userType==1)
                 return 'a';

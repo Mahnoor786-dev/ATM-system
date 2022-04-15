@@ -3,7 +3,7 @@ using PresentationLayer;
 namespace Lecture17_EMS
 {
     class Program
-    {
+    { 
         static void Main(string[] args)
         {
             customerPL customerMenu = new customerPL();

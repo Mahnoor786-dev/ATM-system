@@ -57,7 +57,6 @@ namespace BusinessLogicLayer
             return AccDetails;
         }
 
-
         public void disableUser(string loginId)
         {
             data.disableUser(loginId);
@@ -98,17 +97,24 @@ namespace BusinessLogicLayer
             int acc = (data.checkBalance(b_Obj)).accountNo;
             b_Obj.balance = currentBalance;
             b_Obj.accountNo = acc;
-
-              int withdrawals = (data.withdrawToday(b_Obj)).withdrawalToday;
+            int withdrawals = (data.withdrawToday(b_Obj)).withdrawalToday;
             //withdraw amount if balance is sufficient AND limit of withdawal is not reached
             if ((b_Obj.requestedWithdraw <= currentBalance) && ((withdrawals + b_Obj.requestedWithdraw) <=20000))
             {
                 data.updateBalance(b_Obj);
+                b_Obj.balance = currentBalance-b_Obj.requestedWithdraw; //update balance in object as well
+                Console.WriteLine(" Cash Successfully Withdrawn ");
             }
             else if (b_Obj.requestedWithdraw > currentBalance)
+            {
                 Console.WriteLine("Unsufficient balance for this Withdrawal");
+                b_Obj.requestedWithdraw = 0; //if balance is insufficient, withdrawal=0
+            }
             else
+            { 
                 Console.WriteLine("You have reached max limit of withdrawal for today");
+                b_Obj.requestedWithdraw = 0;
+            }
             return b_Obj;
         }
 
@@ -127,16 +133,23 @@ namespace BusinessLogicLayer
         {
             Customer_BO senderObj = data.checkBalance(b_Obj);
             if (b_Obj.requestedTransaction <= senderObj.balance)
+            {
                 data.transferCash(senderObj, receiver);
+                b_Obj.balance = b_Obj.balance - b_Obj.requestedTransaction; //update balance in B.object after cash transfer
+                Console.WriteLine("Transaction confirmed");
+            }
             else
+            {
                 Console.WriteLine("\nYou have Unsufficient amount for this transaction!");
-            b_Obj.balance = b_Obj.balance - b_Obj.requestedTransaction; //update balance in B.object after cash transfer
+                b_Obj.requestedTransaction = 0; //if balance is insufficient transferred amount = 0
+            }
             return senderObj;
         }
 
         public Customer_BO addCashInAccount(Customer_BO b_Obj)
         {
             b_Obj.balance = b_Obj.balance + b_Obj.requestedDeposit;//update balance in B.object after cash deposit
+            data.addCashInAccount(b_Obj);
             return b_Obj;
         }
 

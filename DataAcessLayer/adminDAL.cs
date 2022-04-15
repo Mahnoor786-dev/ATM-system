@@ -27,6 +27,22 @@ namespace DataAcessLayer
             dr.Close();
             return false;
         }
+        public bool checkIsExist(string Uid)
+        {
+            string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            SqlConnection con = new SqlConnection(conString);
+            con.Open();
+            SqlParameter p1 = new SqlParameter("u", Uid);
+            string query2 = "SELECT * FROM customers WHERE userId=@u";
+            SqlCommand comand2 = new SqlCommand(query2, con);
+            comand2.Parameters.Add(p1);
+            SqlDataReader dr = comand2.ExecuteReader();
+            if (dr.HasRows)
+            {
+                return true;
+            }
+            return false;
+        }
         public int CreateNewAccount(Customer_BO customerAccDetails)
         {
             string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
@@ -58,14 +74,20 @@ namespace DataAcessLayer
             SqlConnection con2 = new SqlConnection(conString);
             con2.Open();
             SqlParameter p1 = new SqlParameter("i", id);
-            string query2 = "SELECT accountNo FROM customers WHERE userId=@i";
+            string query2 = $"SELECT accountNo FROM customers WHERE userId=@i";
             SqlCommand comand2 = new SqlCommand(query2, con2);
             comand2.Parameters.Add(p1);
             SqlDataReader dr = comand2.ExecuteReader();
             int accountNo = 0;
-           
+            string accNo = "0";
             if (dr.HasRows)
-                accountNo = int.Parse(dr[0].ToString());
+            {
+                while (dr.Read())
+                {
+                    accountNo = Int32.Parse(dr["accountNo"].ToString());
+                }
+            }
+          
             con2.Close();
             dr.Close();
             return accountNo;
@@ -83,8 +105,12 @@ namespace DataAcessLayer
             SqlDataReader dr = comand.ExecuteReader();
             string name = "";
             if (dr.HasRows)
-                name = dr["name"].ToString();
-            
+            {
+                while (dr.Read())
+                {
+                    name = dr["name"].ToString();
+                }
+            }
             con.Close();
             dr.Close();
             return name;
@@ -110,6 +136,27 @@ namespace DataAcessLayer
             return false;
         }
 
+        public string getUserid(int accNo)
+        {
+            string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            SqlConnection con = new SqlConnection(conString);
+            con.Open();
+            SqlParameter p1 = new SqlParameter("a", accNo);
+            string query = "SELECT userId FROM customers WHERE accountNo=@a";
+            SqlCommand comand = new SqlCommand(query, con);
+            comand.Parameters.Add(p1);
+            SqlDataReader dr = comand.ExecuteReader();
+            string id = "";
+            if (dr.HasRows)
+            {
+                while (dr.Read())
+                {
+                    id = dr["userId"].ToString();
+                }
+            }
+            return id;
+        }
+
         //delete account from database having specified accountNo
         public bool DeleteExistingAccount(int accountNum)
         {
@@ -119,11 +166,18 @@ namespace DataAcessLayer
                 string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
                 SqlConnection con = new SqlConnection(conString);
                 con.Open();
-                SqlParameter p1 = new SqlParameter("a", accountNum);
-                string query = "DELETE FROM customers WHERE accountNo=@a";
+                string uId = getUserid(accountNum);
+                SqlParameter p0 = new SqlParameter("i", uId);
+                string query = "DELETE FROM cust_Transactions WHERE userId=@i";
                 SqlCommand comand = new SqlCommand(query, con);
-                comand.Parameters.Add(p1);
+                comand.Parameters.Add(p0);
                 comand.ExecuteNonQuery();
+
+                SqlParameter p1 = new SqlParameter("a", accountNum);
+                query = "DELETE FROM customers WHERE accountNo=@a";
+                SqlCommand comand2 = new SqlCommand(query, con);
+                comand2.Parameters.Add(p1);
+                comand2.ExecuteNonQuery();
                 con.Close();
                 return true;
             }
@@ -206,14 +260,14 @@ namespace DataAcessLayer
                 comand.Parameters.Add(p6);
 
             SqlDataReader dr = comand.ExecuteReader();
-            Customer_BO customer = new Customer_BO();
             while (dr.Read())
             {
-                customer.accountNo = int.Parse(dr[0].ToString());
+                Customer_BO customer = new Customer_BO();
+                customer.accountNo = Int32.Parse(dr[0].ToString());
                 customer.UserId=  dr[1].ToString();
                 customer.holderName= dr[2].ToString();
                 customer.accountType=dr[3].ToString();
-                customer.balance=  int.Parse(dr[4].ToString());
+                customer.balance=  Int32.Parse(dr[4].ToString());
                 customer.status=dr[5].ToString();
                 customerList.Add(customer);
             }
@@ -221,7 +275,6 @@ namespace DataAcessLayer
             dr.Close();
             return customerList;
         }
-
 
         public Customer_BO getCustomerDetails(int accountNo)
         {
@@ -236,13 +289,15 @@ namespace DataAcessLayer
             SqlDataReader dr = comand.ExecuteReader();
             if (dr.HasRows)
             {
-                customerOld.accountNo =int.Parse(dr[0].ToString());
-                customerOld.accountType = dr[1].ToString();
-                customerOld.holderName = dr[2].ToString();
-                customerOld.balance = int.Parse(dr[3].ToString());
-                customerOld.status = dr[4].ToString();
+                while (dr.Read())
+                {
+                    customerOld.accountNo =Int32.Parse(dr["accountNo"].ToString());
+                    customerOld.accountType = dr["accountType"].ToString();
+                    customerOld.holderName = dr["name"].ToString();
+                    customerOld.balance = Int32.Parse(dr["balance"].ToString());
+                    customerOld.status = dr["status"].ToString();
+                }
             }
-          
             con.Close();
             dr.Close();
             return customerOld;
@@ -267,6 +322,36 @@ namespace DataAcessLayer
             comand.Parameters.Add(p5);
             comand.ExecuteNonQuery();
             con.Close();
+        }
+
+        public List<Customer_BO> viewReports(int min, int max)
+        {
+            List<Customer_BO> customerList = new List<Customer_BO>();
+            string conString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ATM;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            SqlConnection con = new SqlConnection(conString);
+            con.Open();
+            SqlParameter p1 = new SqlParameter("min", min);
+            SqlParameter p2 = new SqlParameter("max", max);
+
+            string query = "SELECT accountNo, userId, name, accountType,balance,status FROM customers WHERE balance>=@min AND balance<=@max ";
+            SqlCommand comand = new SqlCommand(query, con);
+            comand.Parameters.Add(p1);
+            comand.Parameters.Add(p2);
+            SqlDataReader dr = comand.ExecuteReader();
+            while (dr.Read())
+            {
+                Customer_BO customer = new Customer_BO();
+                customer.accountNo = Int32.Parse(dr[0].ToString());
+                customer.UserId=  dr[1].ToString();
+                customer.holderName= dr[2].ToString();
+                customer.accountType=dr[3].ToString();
+                customer.balance=  Int32.Parse(dr[4].ToString());
+                customer.status=dr[5].ToString();
+                customerList.Add(customer);
+            }
+            con.Close();
+            dr.Close();
+            return customerList;
         }
 
     }

@@ -94,5 +94,9 @@ namespace BusinessLogicLayer
                 customerUpdated.status=customerOld.status;
             adminData.updateCustomer(customerUpdated);
         }
+        public List<Customer_BO> viewReports(int min, int max)
+        {
+            return adminData.viewReports(min, max);
+        }
     }
 }

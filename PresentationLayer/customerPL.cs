@@ -55,58 +55,66 @@ namespace PresentationLayer
             //menu will be shown only when user is login 
             if (isLogIn)
             {
-                Console.WriteLine("1----Withdraw Cash \n2----Cash Transfer\n3----Deposit Cash\n4----Display Balance\n5----Exit\n Please select one of the above options by entering corresponding Number: ");
-                string optionStr = Console.ReadLine();
+                bool isNumeric;
                 int option = 0;
-                bool isNumeric = int.TryParse(optionStr, out option);
-                while (!isNumeric)
+                string optionStr;
+                while (true)
                 {
-                    Console.WriteLine("\nPlease enter valid Pin Code(numbers only): ");
+                    Console.WriteLine("1----Withdraw Cash \n2----Cash Transfer\n3----Deposit Cash\n4----Display Balance\n5----Exit\n Please select one of the above options by entering corresponding Number: ");
                     optionStr = Console.ReadLine();
                     isNumeric = int.TryParse(optionStr, out option);
-                }
-                switch (option)
-                {
-                    case 1:
-                        Console.WriteLine("\n========  Withdraw Cash ========\n");
-                        int mode = 0;
-                        string modeStr;
-                        Console.WriteLine("1) Fast Cash\n2) Normal Cash.\nPlease select a mode of withdrawal by entering corresponding Number:");
-                        while ((mode!=1) && (mode!=2))
-                        {
-                            modeStr = Console.ReadLine();
-                            isNumeric = int.TryParse(modeStr, out mode);
-                            while (!isNumeric)
+                    while (!isNumeric)
+                    {
+                        Console.WriteLine("\nPlease enter valid Pin Code(numbers only): ");
+                        optionStr = Console.ReadLine();
+                        isNumeric = int.TryParse(optionStr, out option);
+                    }
+
+                    switch (option)
+                    {
+                        case 1:
+                            Console.WriteLine("\n========  Withdraw Cash ========\n");
+                            int mode = 0;
+                            string modeStr;
+                            Console.WriteLine("1) Fast Cash\n2) Normal Cash.\nPlease select a mode of withdrawal by entering corresponding Number:");
+                            while ((mode!=1) && (mode!=2))
                             {
-                                Console.WriteLine("\nPlease enter valid option from above menu(1/2): ");
                                 modeStr = Console.ReadLine();
                                 isNumeric = int.TryParse(modeStr, out mode);
+                                while (!isNumeric)
+                                {
+                                    Console.WriteLine("\nPlease enter valid option from above menu(1/2): ");
+                                    modeStr = Console.ReadLine();
+                                    isNumeric = int.TryParse(modeStr, out mode);
+                                }
+                                if ((mode!=1) || (mode!=2))
+                                    Console.WriteLine("Please Enter valid choice:  ");
                             }
-                            if ((mode!=1) || (mode!=2))
-                                Console.WriteLine("Please Enter valid choice:  ");
-                        }
-                        if (mode==1)
-                            fastCash(ref b_Obj);
-                        else
-                            normalCash(ref b_Obj);
-                        break;
+                            if (mode==1)
+                                fastCash(ref b_Obj);
+                            else
+                                normalCash(ref b_Obj);
+                            break;
 
-                    case 2:
-                        Console.WriteLine("\n========  Cash Transfer ========\n");
-                        transferCash(ref b_Obj);
-                        break;
-                    case 3:
-                        Console.WriteLine("\n========  Deposit Cash ========\n");
-                        depositCash(ref b_Obj);
-                        break;
-                    case 4:
-                        Console.WriteLine("\n========  Display balance ========\n");
-                        displayBalance(ref b_Obj);
-                        break;
-                    case 5:
-                        break;
-                    default:
-                        Console.WriteLine("*** Invalid choice ***");
+                        case 2:
+                            Console.WriteLine("\n========  Cash Transfer ========\n");
+                            transferCash(ref b_Obj);
+                            break;
+                        case 3:
+                            Console.WriteLine("\n========  Deposit Cash ========\n");
+                            depositCash(ref b_Obj);
+                            break;
+                        case 4:
+                            Console.WriteLine("\n========  Display balance ========\n");
+                            displayBalance(ref b_Obj);
+                            break;
+                        case 5:
+                            break;
+                        default:
+                            Console.WriteLine("*** Invalid choice ***");
+                            break;
+                    }
+                    if ((option==5)||(option>5))
                         break;
                 }
             }
@@ -117,17 +125,22 @@ namespace PresentationLayer
         //ask user to print receipt, print if needed
         public void receipt(ref Customer_BO b_Obj, int receiptType)
         {
-            string choicee = "g";
-            while ((choicee != "Y")&&(choicee != "N"))
+            char choice = 'Y'; //choice=yes by default
+            if (receiptType!=4) //ask to print receipt for functions other than display balance
             {
-                Console.WriteLine("\nDo you wish to print a receipt(Y/N) ?");
-                choicee = Console.ReadLine();
-                choicee = choicee.ToUpper();
+                string choicee = "g";
+                while ((choicee != "Y")&&(choicee != "N"))
+                {
+                    Console.WriteLine("\nDo you wish to print a receipt(Y/N) ?");
+                    choicee = Console.ReadLine();
+                    choicee = choicee.ToUpper();
+                }
+                choice = choicee[0];
             }
-            char choice = choicee[0];
+           
             if (choice=='Y')
             {
-                Console.WriteLine("\n*********** RECEIPT ***********\nAccount#: "+ b_Obj.accountNo+ "\nDate: ", DateTime.Today);
+                Console.WriteLine("\n*********** RECEIPT ***********\nAccount#: " + b_Obj.accountNo + "\nDate: " + DateTime.Today);
                 //show relevant result according to operation performed
                 switch(receiptType)
                 {
@@ -185,7 +198,6 @@ namespace PresentationLayer
             else
             {
                 Customer_BO updatedObj = busLogic.withdrawCash( b_Obj);
-                Console.WriteLine("Cash Successfully Withdrawn!");
                 receipt(ref updatedObj, 1);
             }
         }
@@ -204,14 +216,11 @@ namespace PresentationLayer
             }
             b_Obj.requestedWithdraw = amountNumeric; //set requested withdrawal amount
             Customer_BO updatedObj = busLogic.withdrawCash(b_Obj); //validate requested amount (<balance) and then withdraw
-            Console.WriteLine(" Cash Successfully Withdrawn ");
             receipt(ref updatedObj, 1);
         }
-
         public void transferCash(ref Customer_BO b_Obj)
         {
             int amount = 1;
-            int option = 0;
             bool isNumeric;
             string optionStr;
             //checks: amount should be multiple of 500, input must be numeric
@@ -219,12 +228,12 @@ namespace PresentationLayer
             {
                 Console.WriteLine("\nEnter amount in multiples of 500: ");
                 optionStr = Console.ReadLine();
-                isNumeric = int.TryParse(optionStr, out option);
+                isNumeric = int.TryParse(optionStr, out amount);
                 while (!isNumeric)
                 {
                     Console.WriteLine("\nPlease enter valid amount (numbers only).. ");
                     optionStr = Console.ReadLine();
-                    isNumeric = int.TryParse(optionStr, out option);
+                    isNumeric = int.TryParse(optionStr, out amount);
                 }
                 if (amount%500 != 0)
                     Console.WriteLine("--- Please Enter valid amount --- \n");
@@ -236,12 +245,11 @@ namespace PresentationLayer
             if (busLogic.checkExistenceOfAccount(accountNo))
             {
                 cashReceiver_BO receiver = busLogic.getNameOfAccountHolder(new cashReceiver_BO(accountNo));
-                Console.WriteLine("You wish to deposit Rs " + amount + "in account held by ", receiver.name, "; If this information is correct please re-enter the account number: ");
+                Console.WriteLine("You wish to deposit Rs " + amount + "in account held by " + receiver.name + "; If this information is correct please re-enter the account number: ");
                 int accountNo2 = int.Parse(Console.ReadLine());
                 if (accountNo==accountNo2)
                 {
                     Customer_BO updatedObj = busLogic.transferCash(b_Obj, receiver); //pass business objects of sender and receiver to transfer cash
-                    Console.WriteLine("Transaction confirmed");
                     receipt(ref updatedObj, 2); //argument 2 will result in displaying "amount transferred" in receipt
                 }
                 else
@@ -255,7 +263,6 @@ namespace PresentationLayer
         {
             Console.WriteLine("\nEnter the cash amount to deposit: ");
             int amount = int.Parse(Console.ReadLine());
-
             b_Obj.requestedDeposit= amount; //save the requested deposit amount in BO
             Customer_BO updatedObj = busLogic.addCashInAccount(b_Obj);
             Console.WriteLine("\nCash Deposited Successfully.");
